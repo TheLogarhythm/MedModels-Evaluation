@@ -129,22 +129,9 @@ class DatasetProcessor:
     def check_dataset_exists_locally(self, dataset_name: str) -> bool:
         """Check if the dataset exists in the local directory."""
         local_train_num, local_test_num = self._get_local_dataset_size(dataset_name)
-        
-        # Special handling for datasets with duplicate images in JSONL
-        duplicate_datasets = {"016_CBIS_DDSM_CALC", "016_CBIS_DDSM_MASS"}
-        if dataset_name in duplicate_datasets:
-            # Use unique image count from JSONL instead of total lines
-            train_meta = self._load_jsonl_file(os.path.join(self.meta_data_base_path, self.dataset_meta['D'+dataset_name]['train_meta']))
-            test_meta = self._load_jsonl_file(os.path.join(self.meta_data_base_path, self.dataset_meta['D'+dataset_name]['test_meta']))
-            
-            unique_train_images = len(set(item.get('image') for item in train_meta if item.get('image')))
-            unique_test_images = len(set(item.get('image') for item in test_meta if item.get('image')))
-            
-            meta_train_num = unique_train_images
-            meta_test_num = unique_test_images
-        else:
-            meta_train_num = self.dataset_meta['D'+dataset_name]['train_num']
-            meta_test_num = self.dataset_meta['D'+dataset_name]['test_num']
+
+        meta_train_num = self.dataset_meta['D'+dataset_name]['train_num']
+        meta_test_num = self.dataset_meta['D'+dataset_name]['test_num']
         
         return local_train_num == meta_train_num and local_test_num == meta_test_num
     
@@ -181,7 +168,16 @@ class DatasetProcessor:
                 dst_image_directory = os.path.join(self.local_dataset_base_path, dataset_name, 'test')
                 shutil.copy(src_image_path, dst_image_directory)
         else:
-            for line in train_meta:
+            # Track copied files to handle duplicate image names (should be different files)
+            copied_files_train = set()
+            copied_files_test = set()
+            train_copy_count = 0
+            test_copy_count = 0
+            train_missing_count = 0
+            test_missing_count = 0
+            
+            print(f"Copying train set for {dataset_name}...")
+            for i, line in enumerate(train_meta):
                 image = line['image']
                 label_text = line['label_text'].strip()
                 label = self.map_label(dataset_name, label_text)
@@ -192,9 +188,39 @@ class DatasetProcessor:
                 src_image_path = os.path.join(self.dataset_base_path, image)
                 dst_image_directory = os.path.join(self.local_dataset_base_path, dataset_name, 'train', label)
                 os.makedirs(dst_image_directory, exist_ok=True)
-                shutil.copy(src_image_path, dst_image_directory)
-
-            for line in test_meta:
+                
+                # Check if source file exists
+                if not os.path.exists(src_image_path):
+                    train_missing_count += 1
+                    if train_missing_count <= 5:  # Show first 5 missing files
+                        print(f"  WARNING: Source image not found: {src_image_path}")
+                    continue
+                
+                # Generate destination filename
+                base_name = os.path.basename(image)
+                dst_image_path = os.path.join(dst_image_directory, base_name)
+                
+                # Handle duplicates by creating unique names
+                if dst_image_path in copied_files_train:
+                    name, ext = os.path.splitext(base_name)
+                    counter = 1
+                    while dst_image_path in copied_files_train:
+                        unique_name = f"{name}_dup{counter}{ext}"
+                        dst_image_path = os.path.join(dst_image_directory, unique_name)
+                        counter += 1
+                
+                try:
+                    shutil.copy2(src_image_path, dst_image_path)
+                    copied_files_train.add(dst_image_path)
+                    train_copy_count += 1
+                except Exception as e:
+                    print(f"  ERROR copying {src_image_path}: {e}")
+                
+                if (i + 1) % 100 == 0:  # Progress update every 100 files
+                    print(f"  Progress: {i + 1}/{len(train_meta)} train images copied")
+            
+            print(f"Copying test set for {dataset_name}...")
+            for i, line in enumerate(test_meta):
                 image = line['image']
                 label_text = line['label_text'].strip()
                 label = self.map_label(dataset_name, label_text)
@@ -205,4 +231,41 @@ class DatasetProcessor:
                 src_image_path = os.path.join(self.dataset_base_path, image)
                 dst_image_directory = os.path.join(self.local_dataset_base_path, dataset_name, 'test', label)
                 os.makedirs(dst_image_directory, exist_ok=True)
-                shutil.copy(src_image_path, dst_image_directory)
+                
+                # Check if source file exists
+                if not os.path.exists(src_image_path):
+                    test_missing_count += 1
+                    if test_missing_count <= 5:  # Show first 5 missing files
+                        print(f"  WARNING: Source image not found: {src_image_path}")
+                    continue
+                
+                # Generate destination filename
+                base_name = os.path.basename(image)
+                dst_image_path = os.path.join(dst_image_directory, base_name)
+                
+                # Handle duplicates by creating unique names
+                if dst_image_path in copied_files_test:
+                    name, ext = os.path.splitext(base_name)
+                    counter = 1
+                    while dst_image_path in copied_files_test:
+                        unique_name = f"{name}_dup{counter}{ext}"
+                        dst_image_path = os.path.join(dst_image_directory, unique_name)
+                        counter += 1
+                
+                try:
+                    shutil.copy2(src_image_path, dst_image_path)
+                    copied_files_test.add(dst_image_path)
+                    test_copy_count += 1
+                except Exception as e:
+                    print(f"  ERROR copying {src_image_path}: {e}")
+                
+                if (i + 1) % 50 == 0:  # Progress update every 50 files
+                    print(f"  Progress: {i + 1}/{len(test_meta)} test images copied")
+            
+            # Print summary
+            print(f"\nCopy summary for {dataset_name}:")
+            print(f"  Train: {train_copy_count}/{len(train_meta)} copied, {train_missing_count} missing")
+            print(f"  Test:  {test_copy_count}/{len(test_meta)} copied, {test_missing_count} missing")
+            
+            if train_missing_count > 0 or test_missing_count > 0:
+                print(f"  WARNING: {train_missing_count + test_missing_count} source images were not found")

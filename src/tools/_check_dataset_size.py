@@ -4,6 +4,11 @@
 import json
 import os
 from pathlib import Path
+import sys
+
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, project_root)
+
 from core.dataset_processor import DatasetProcessor
 
 def main():
@@ -55,18 +60,6 @@ def main():
         info = metadata[dataset_key]
         expected_train = info.get('train_num', 0)
         expected_test = info.get('test_num', 0)
-        
-        # Special handling for datasets with duplicate images: use unique image count
-        if dataset_name in ["016_CBIS_DDSM_CALC", "016_CBIS_DDSM_MASS"]:
-            # Load JSONL and count unique images
-            train_meta_path = os.path.join("/jhcnas4/Generalist/shebd/Generalist_Meta_data", info['train_meta'])
-            test_meta_path = os.path.join("/jhcnas4/Generalist/shebd/Generalist_Meta_data", info['test_meta'])
-            
-            train_meta = processor._load_jsonl_file(train_meta_path)
-            test_meta = processor._load_jsonl_file(test_meta_path)
-            
-            expected_train = len(set(item.get('image') for item in train_meta if item.get('image')))
-            expected_test = len(set(item.get('image') for item in test_meta if item.get('image')))
         
         actual_train, actual_test = processor._get_local_dataset_size(dataset_name)
 
