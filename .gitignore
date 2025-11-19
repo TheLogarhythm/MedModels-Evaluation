@@ -1,5 +1,5 @@
 datasets/
-src/__pycache__/
+__pycache__/
 scripts/wandb/
 
 dataset_meta_cls.json
