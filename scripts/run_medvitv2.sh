@@ -23,12 +23,14 @@ for dataset_name in "${DATASETS[@]}"; do
 
     for size in ${MODEL_SIZES[$MODEL]}; do
         # Get hyperparameters
-        lr=$(get_hyperparam $MODEL $size "lr")
-        bs=$(get_hyperparam $MODEL $size "bs")
-        wd=$(get_hyperparam $MODEL $size "wd")
-        epochs=$(get_hyperparam $MODEL $size "epochs")
+        lr=$(get_hyperparam $MODEL $size "LR")
+        bs=$(get_hyperparam $MODEL $size "BS") 
+        wd=$(get_hyperparam $MODEL $size "WD")
+        epochs=$(get_hyperparam $MODEL $size "EPOCHS")
+        beta1=$(get_hyperparam $MODEL $size "BETA1")
+        beta2=$(get_hyperparam $MODEL $size "BETA2")
 
-        run_training $MODEL $size $ENV $dataset_name $bs $DEVICE $lr $wd $epochs
+        run_training $MODEL $size $ENV $dataset_name $bs $DEVICE $lr $wd $epochs $beta1 $beta2
     done
 
     echo "Completed training on dataset: $dataset_name"

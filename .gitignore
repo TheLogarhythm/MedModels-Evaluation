@@ -4,5 +4,3 @@ scripts/wandb/
 wandb/
 logs/
 eval_results/
-
-dataset_meta_cls.json
