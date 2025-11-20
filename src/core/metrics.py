@@ -4,8 +4,8 @@ This module contains:
     2. path for saving evaluation results
 """
 
-SAVING_BASE_DIR = "/jhcnas5/Generalist/shebd/luoyi"
-# /{Method}_{Scale}_{Dataset}/
+SAVING_BASE_DIR = "/home/sunanhe/luoyi/model_eval/eval_results"
+# /{Model}_{Scale}_{Dataset}/
 # checkpoints: best.pth, last.pth
 # json: best_results.json, last_results.json (prediction and ground_truth of all instances)
 
@@ -150,22 +150,26 @@ def eval_multilabel(result_json, label_set):
 
     return acc, macro_f1, micro_f1, preds, targets
 
-def calculate_metrics(predictions, targets, dataset_processor, args):
+def calculate_metrics(predictions, targets, dataset_loader, args):
     """Helper function to calculate metrics"""
-    if dataset_processor.dataset_meta['D' + args.dataset_name]['tasktype'] == 'binary':
+    # Get task type and label set from dataset_loader
+    task_type = dataset_loader.get_task_type()
+    label_set = dataset_loader.classes
+    
+    if task_type == 'binary':
         return eval_binary(
             result_json=[{'prediction': pred, 'ground_truth': target} for pred, target in zip(predictions, targets)],
-            label_set=dataset_processor.dataset_meta['D' + args.dataset_name]['label_set']
+            label_set=label_set
         )
-    elif dataset_processor.dataset_meta['D' + args.dataset_name]['tasktype'] == 'multiclass':
+    elif task_type == 'multiclass':
         return eval_multiclass(
             result_json=[{'prediction': pred, 'ground_truth': target} for pred, target in zip(predictions, targets)],
-            label_set=dataset_processor.dataset_meta['D' + args.dataset_name]['label_set']
+            label_set=label_set
         )
-    elif dataset_processor.dataset_meta['D' + args.dataset_name]['tasktype'] == 'multilabel':
+    elif task_type == 'multilabel':
         return eval_multilabel(
             result_json=[{'prediction': pred, 'ground_truth': target} for pred, target in zip(predictions, targets)],
-            label_set=dataset_processor.dataset_meta['D' + args.dataset_name]['label_set']
+            label_set=label_set
         )
     else:
-        raise ValueError("Unsupported task-type in dataset metadata")
+        raise ValueError(f"Unsupported task-type: {task_type}")

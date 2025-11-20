@@ -22,23 +22,19 @@ run_training() {
     local learning_rate=$7
     local weight_decay=$8
     local epochs=$9
-    
+    local beta1=${10} 
+    local beta2=${11}
+
     echo "Training $model-$size on $dataset_name..."
     echo "  LR: $learning_rate, BS: $batch_size, WD: $weight_decay, Epochs: $epochs"
 
-    # Get additional hyperparameters if they exist
-    local lr_decay=$(get_hyperparam $model $size "lr_decay")
-    local lr_decay_epochs=$(get_hyperparam $model $size "lr_decay_epochs")
-    local beta1=$(get_hyperparam $model $size "beta1")
-    local beta2=$(get_hyperparam $model $size "beta2")
-
-    # Build command with optional parameters
-    local cmd="conda run -n $env python ${SRC_DIR}/train_${model}.py \
+    # Build command - using unified train.py with proper path
+    local cmd="conda run -n $env python ${SRC_DIR}/train.py \
         --dataset_name $dataset_name \
         --model_name $model \
         --model_size $size \
         --wandb_entity $WANDB_ENTITY \
-        --wandb_project medical-image-classification \
+        --wandb_project GSCO_baseline \
         --wandb_name ${model}_${size}_${dataset_name}_$(date +%Y%m%d_%H%M%S) \
         --batch_size $batch_size \
         --device $device \
@@ -47,19 +43,15 @@ run_training() {
         --epochs $epochs"
 
     # Add optional parameters if they exist
-    if [ ! -z "$lr_decay" ]; then
-        cmd="$cmd --lr_decay $lr_decay"
-    fi
-    if [ ! -z "$lr_decay_epochs" ]; then
-        cmd="$cmd --lr_decay_epochs $lr_decay_epochs"
-    fi
-    if [ ! -z "$beta1" ]; then
+    if [ ! -z "$beta1" ] && [ "$beta1" != "null" ]; then
         cmd="$cmd --beta1 $beta1"
     fi
-    if [ ! -z "$beta2" ]; then
+    if [ ! -z "$beta2" ] && [ "$beta2" != "null" ]; then
         cmd="$cmd --beta2 $beta2"
     fi
 
+    # Execute the command
+    echo "Running: $cmd"
     eval $cmd
 }
 
