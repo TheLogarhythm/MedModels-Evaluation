@@ -4,7 +4,7 @@ This module contains:
     2. path for saving evaluation results
 """
 
-from src.utils.config import SAVING_BASE_DIR
+from utils.config import SAVING_BASE_DIR
 # Saving folder name: /{Model}_{Scale}_{Dataset}/
 #   checkpoints: best.pth, last.pth
 #   json: best_results.json, last_results.json (prediction and ground_truth of all instances)
