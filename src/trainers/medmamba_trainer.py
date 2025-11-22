@@ -54,9 +54,8 @@ class MedMambaTrainer(BaseTrainer):
         return None
     
     def get_transforms(self):
-        """Get MedMamba transforms - using MedViT normalization for consistency"""
-        MEDMAMBA_MEAN = [0.5, 0.5, 0.5]
-        MEDMAMBA_STD = [0.5, 0.5, 0.5]
+        """Get MedMamba transforms"""
+        from utils.config import MEDIMAGE_MEAN, MEDIMAGE_STD
 
         return {
             "train": transforms.Compose([
@@ -64,12 +63,12 @@ class MedMambaTrainer(BaseTrainer):
                 transforms.RandomHorizontalFlip(),
                 transforms.Lambda(lambda image: image.convert('RGB')),
                 transforms.ToTensor(),
-                transforms.Normalize(mean=MEDMAMBA_MEAN, std=MEDMAMBA_STD)
+                transforms.Normalize(mean=MEDIMAGE_MEAN, std=MEDIMAGE_STD)
             ]),
             "test": transforms.Compose([
                 transforms.Resize((224, 224)),
                 transforms.Lambda(lambda image: image.convert('RGB')),
                 transforms.ToTensor(),
-                transforms.Normalize(mean=MEDMAMBA_MEAN, std=MEDMAMBA_STD)
+                transforms.Normalize(mean=MEDIMAGE_MEAN, std=MEDIMAGE_STD)
             ])
         }

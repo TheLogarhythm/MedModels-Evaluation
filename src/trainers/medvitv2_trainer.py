@@ -63,20 +63,18 @@ class MedViTV2Trainer(BaseTrainer):
     
     def get_transforms(self):
         """Get MedViTV2 transforms - using MedViT normalization"""
-        MEDVIT_MEAN = [0.5, 0.5, 0.5]
-        MEDVIT_STD = [0.5, 0.5, 0.5]
-
+        from utils.config import MEDIMAGE_MEAN, MEDIMAGE_STD
         return {
             "train": transforms.Compose([
                 transforms.Resize((224, 224)),
                 transforms.Lambda(lambda image: image.convert('RGB')),
                 transforms.ToTensor(),
-                transforms.Normalize(mean=MEDVIT_MEAN, std=MEDVIT_STD)
+                transforms.Normalize(mean=MEDIMAGE_MEAN, std=MEDIMAGE_STD)
             ]),
             "test": transforms.Compose([
                 transforms.Resize((224, 224)),
                 transforms.Lambda(lambda image: image.convert('RGB')),
                 transforms.ToTensor(),
-                transforms.Normalize(mean=MEDVIT_MEAN, std=MEDVIT_STD)
+                transforms.Normalize(mean=MEDIMAGE_MEAN, std=MEDIMAGE_STD)
             ])
         }

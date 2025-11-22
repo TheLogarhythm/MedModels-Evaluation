@@ -1,10 +1,5 @@
 #!/bin/bash
 
-# Common utility functions
-WANDB_API_KEY="949480fc468133a90171487e61c9830a949d9872"
-WANDB_ENTITY="royalty-hong-kong-university-of-science-and-technology"
-SRC_DIR="/home/sunanhe/luoyi/model_eval/src"
-
 # Login to wandb
 wandb_login() {
     echo "Logging in to Weights & Biases..."

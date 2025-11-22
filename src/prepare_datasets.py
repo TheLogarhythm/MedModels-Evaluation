@@ -8,8 +8,7 @@ from pathlib import Path
 from core.dataset_processor import DatasetProcessor
 from typing import Optional, List
 
-# State file location
-STATE_FILE = "/home/sunanhe/luoyi/model_eval/logs/dataset_preparation/preparation_state.json"
+from utils.config import TRAINING_STATE_FILE as STATE_FILE
 
 class DatasetPreparationState:
     """Manage dataset preparation state"""
@@ -230,29 +229,7 @@ def main(force_all: bool = False, reset: bool = False, specific_datasets: Option
         specific_datasets: List of specific datasets to prepare (None = all)
     """
     
-    # All available datasets
-    all_datasets = [
-        "010_RSNA",
-        "011_SIIM-ACR",
-        "016_CBIS_DDSM_CALC",
-        "016_CBIS_DDSM_MASS",
-        "017_MedFMC_ENDO",
-        "017_MedFMC_COLON",
-        "021_PADUFES20",
-        "025_Dermnet",
-        "027_NLMTB",
-        "034_ODIR",
-        "037_WCE",
-        "043_UBIBC",
-        "044_BUSI",
-        "046_BUSBRA",
-        "051_Derm7PT_Derm",
-        "051_Derm7PT_Clinic",
-        "075_PCam200",
-        "077_RetOCT",
-        "136_ChestXRay2017",
-        "137_OCT2017"
-    ]
+    from utils.config import ALL_DATASETS as all_datasets
     
     # Determine which datasets to process
     datasets = specific_datasets if specific_datasets else all_datasets

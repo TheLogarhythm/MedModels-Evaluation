@@ -4,10 +4,10 @@ This module contains:
     2. path for saving evaluation results
 """
 
-SAVING_BASE_DIR = "/home/sunanhe/luoyi/model_eval/eval_results"
-# /{Model}_{Scale}_{Dataset}/
-# checkpoints: best.pth, last.pth
-# json: best_results.json, last_results.json (prediction and ground_truth of all instances)
+from src.utils.config import SAVING_BASE_DIR
+# Saving folder name: /{Model}_{Scale}_{Dataset}/
+#   checkpoints: best.pth, last.pth
+#   json: best_results.json, last_results.json (prediction and ground_truth of all instances)
 
 
 import torch

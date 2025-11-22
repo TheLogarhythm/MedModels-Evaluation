@@ -63,18 +63,17 @@ class MedViTTrainer(BaseTrainer):
     
     def get_transforms(self):
         """Get MedViT transforms"""
-        IMAGENET_MEAN = [0.5, 0.5, 0.5]
-        IMAGENET_STD = [0.5, 0.5, 0.5]
+        from utils.config import MEDIMAGE_MEAN, MEDIMAGE_STD
 
         return {
             "train": transforms.Compose([
                 transforms.Resize((224, 224)),
                 transforms.ToTensor(),
-                transforms.Normalize(mean=IMAGENET_MEAN, std=IMAGENET_STD)
+                transforms.Normalize(mean=MEDIMAGE_MEAN, std=MEDIMAGE_STD)
             ]),
             "test": transforms.Compose([
                 transforms.Resize((224, 224)),
                 transforms.ToTensor(),
-                transforms.Normalize(mean=IMAGENET_MEAN, std=IMAGENET_STD)
+                transforms.Normalize(mean=MEDIMAGE_MEAN, std=MEDIMAGE_STD)
             ])
         }

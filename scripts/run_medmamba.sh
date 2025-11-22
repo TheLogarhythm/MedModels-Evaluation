@@ -6,6 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/config/datasets.conf"
 source "${SCRIPT_DIR}/config/models.conf"
 source "${SCRIPT_DIR}/config/hyperparameters.conf"
+source "${SCRIPT_DIR}/config/wandb.conf" 
 source "${SCRIPT_DIR}/utils.sh"
 
 # Login to wandb
